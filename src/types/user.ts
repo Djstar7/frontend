@@ -5,8 +5,7 @@ type StatusMat = 'single' | 'married' | 'divorced' | 'widowed'
 interface UserRegister {
   name: string
   email: string
-  phone: string
-  password: string
+  password?: string
   role?: Role
 }
 interface UserLogin {
@@ -20,6 +19,7 @@ interface UserForgotPassword {
 interface Profil {
   first_name: string
   last_name: string
+  phone: string
   gender: Gender
   date_of_birth: string
   place_of_birth: string
@@ -28,6 +28,7 @@ interface Profil {
 }
 
 interface Custom {
+  id: number
   name: string
   email: string
   phone: string
@@ -42,4 +43,11 @@ interface Custom {
   country_name: string
 }
 
-export type { UserRegister, UserLogin, Profil, UserForgotPassword, Role, Custom }
+interface UserState {
+  user: UserRegister | null
+  token: string | null
+  isAuthenticated: boolean
+  loading: boolean
+  error: string | null
+}
+export type { UserRegister, UserLogin, Profil, UserState, UserForgotPassword, Role, Custom }

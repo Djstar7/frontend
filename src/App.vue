@@ -6,6 +6,7 @@ import MainLayout from './layouts/MainLayout.vue'
 
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import CustomLayout from './layouts/CustomLayout.vue'
 
 const router = useRouter()
 // Computed pour obtenir le chemin actuel du routeur
@@ -15,9 +16,10 @@ const routerPath = computed(() => router.currentRoute.value.path)
 
 <template>
   <div>
-    <AuthLayout v-if="routerPath.includes('/auth')" />
-    <AgentLayout v-else-if="routerPath.includes('/agent')" />
-    <AdminLayout v-else-if="routerPath.includes('/admin')" />
+    <AuthLayout v-if="routerPath.startsWith('/auth')" />
+    <AgentLayout v-else-if="routerPath.startsWith('/agent')" />
+    <AdminLayout v-else-if="routerPath.startsWith('/admin')" />
+    <CustomLayout v-else-if="routerPath.startsWith('/custom')" />
     <MainLayout v-else />
   </div>
 </template>

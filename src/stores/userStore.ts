@@ -1,96 +1,183 @@
+// src/stores/useUserStore.ts
 import { defineStore } from 'pinia'
-import type { UserRegister, UserLogin, Role, Custom } from '@/types/user'
-import { userService } from '@/services/userService'
-import type { UpdatePasswordData } from '@/services/userService'
-
-interface UserState {
-  profile: UserRegister | null
-  token: string | null
-  isAuthenticated: boolean
-}
+import userService from '@/services/userService'
+import router from '@/router'
+import { toast } from 'vue3-toastify'
+import type { UserLogin, UserState, UserRegister, Custom } from '@/types/user'
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
-    profile: null,
-    token: null,
-    isAuthenticated: false,
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    token: localStorage.getItem('access_token'),
+    isAuthenticated: !!localStorage.getItem('access_token'),
+    loading: false,
+    error: null,
   }),
 
-  getters: {
-    name: (state) => state.profile?.name || '',
-    email: (state) => state.profile?.email || '',
-    hasRole: (state) => (role: Role) => state.profile?.role === role,
-  },
-
   actions: {
-    // Charger depuis localStorage
-    loadFromStorage() {
-      const storedProfile = localStorage.getItem('userProfile')
-      const storedToken = localStorage.getItem('userToken')
-      if (storedProfile && storedToken) {
-        this.profile = JSON.parse(storedProfile) as UserRegister
-        this.token = storedToken
+    notifySuccess(msg: string) {
+      toast.success(msg)
+    },
+
+    notifyError(msg: string) {
+      toast.error(msg)
+    },
+    notifyLoading(msg: string) {
+      toast.loading(msg)
+    },
+    async register(data: UserRegister) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.register(data)
+        this.token = response.access_token
+        this.user = response.user
         this.isAuthenticated = true
+
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('access_token', this.token)
+        localStorage.setItem('user', JSON.stringify(this.user))
+
+        await router.push({ name: 'custom.dashboard' })
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Échec de l'enregistrement."
+        this.resetAuth()
+        throw err
+      } finally {
+        this.loading = false
       }
     },
 
     async login(credentials: UserLogin) {
-      const { token, user } = await userService.login(credentials)
-      this.setUser(user, token) // user doit être de type UserRegister
-    },
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.login(credentials)
+        this.token = response.access_token
+        this.user = response.user
+        this.isAuthenticated = true
 
-    async register(userData: UserRegister) {
-      const result = await userService.register(userData)
-      return result // Contient { message }
-    },
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('access_token', this.token)
+        localStorage.setItem('user', JSON.stringify(this.user))
 
-    async fetchProfile() {
-      if (!this.token) return
-      const profile = await userService.getProfile(this.token)
-
-      // Conversion Profil → UserRegister si nécessaire
-      const userRegisterData: UserRegister = {
-        name: profile.name,
-        email: profile.email,
-        phone: '', // selon API Laravel
-        password: '', // jamais renvoyé par API
-        role: profile.role,
+        await router.push({ name: 'custom.dashboard' })
+      } catch (err: any) {
+        this.error =
+          err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.'
+        this.resetAuth()
+        throw err
+      } finally {
+        this.loading = false
       }
-
-      this.profile = userRegisterData
-      localStorage.setItem('userProfile', JSON.stringify(userRegisterData))
-    },
-
-    async updateProfile(updatedData: Custom) {
-      if (!this.token || !this.profile) return
-      const updatedProfile = { ...this.profile, ...updatedData }
-      this.profile = updatedProfile
-      localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
-
-      // Appel API si nécessaire
-      await userService.updateProfile(this.token, updatedProfile)
-    },
-
-    async changePassword(passwords: UpdatePasswordData) {
-      if (!this.token) throw new Error('Pas de token disponible')
-      return await userService.changePassword(this.token, passwords)
     },
 
     async logout() {
-      if (this.token) await userService.logout()
-      this.profile = null
-      this.token = null
-      this.isAuthenticated = false
-      localStorage.removeItem('userProfile')
-      localStorage.removeItem('userToken')
+      this.loading = true
+      this.error = null
+      try {
+        // await userService.logout() // optionnel côté serveur
+      } catch (err: any) {
+        this.error = err.response?.data?.message || 'Erreur lors de la déconnexion.'
+      } finally {
+        this.resetAuth()
+        await router.push({ name: 'auth.login' })
+        this.loading = false
+      }
+    },
+    async getUsers() {
+      try {
+        return await userService.getUsers()
+      } catch (e: any) {
+        console.error(
+          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
+        )
+      }
+    },
+    async createUser(UserData: Custom) {
+      try {
+        return await userService.createUser(UserData)
+      } catch (e: any) {
+        console.error(
+          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
+        )
+      }
     },
 
-    setUser(profile: UserRegister, token: string) {
-      this.profile = profile
-      this.token = token || null
-      this.isAuthenticated = true
-      localStorage.setItem('userProfile', JSON.stringify(profile))
-      localStorage.setItem('userToken', token)
+    async getUser(id: number) {
+      try {
+        return await userService.getUser(id)
+      } catch (e: any) {
+        console.error(
+          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
+        )
+      }
+    },
+    async editUser(id: number, UserData: Custom) {
+      try {
+        const response = await userService.editUser(id, UserData)
+        this.user = response.user
+        this.isAuthenticated = true
+
+        localStorage.setItem('user', JSON.stringify(this.user))
+        await router.push({ name: 'custom.profil' })
+      } catch (e: any) {
+        console.error(
+          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
+        )
+      }
+    },
+
+    async deleteUser(id: number) {
+      this.loading = true
+      this.error = null
+      try {
+        await userService.deleteUser(id)
+      } catch (err: any) {
+        this.error = err.response?.data?.message || 'Erreur lors de la déconnexion.'
+      } finally {
+        await router.push({ name: 'custom.profil' })
+        this.loading = false
+      }
+    },
+
+    async fetchCurrentUser() {
+      if (!this.token) return
+
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.fetchUser()
+        this.user = response.user
+        this.isAuthenticated = true
+
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('user', JSON.stringify(this.user))
+      } catch (err: any) {
+        console.error("Erreur lors de la récupération de l'utilisateur :", err)
+        this.resetAuth()
+
+        // Si l'erreur est 401 (Unauthorized), rediriger vers login
+        if (err.response && err.response.status === 401) {
+          await router.push({ name: 'auth.login' })
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async initializeAuth() {
+      if (this.token && !this.user) {
+        await this.fetchCurrentUser()
+      }
+    },
+
+    resetAuth() {
+      this.user = null
+      this.token = null
+      this.isAuthenticated = false
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('user')
     },
   },
 })
