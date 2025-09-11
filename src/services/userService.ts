@@ -1,6 +1,5 @@
-// src/services/userService.ts
 import api from '@/services/api'
-import type { Custom, UserRegister } from '@/types/user'
+import type { Custom, Profil, UserRegister } from '@/types/user'
 
 interface LoginData {
   email: string
@@ -31,20 +30,57 @@ const userService = {
     const response = await api.post<{ message: string }>('/auth/logout')
     return response.data
   },
-  async getUsers(): Promise<UserResponse[]> {
+  async getUser(): Promise<UserResponse[]> {
     const response = await api.get<UserResponse[]>('/user')
     return response.data
   },
-  async createUser(UserData: Custom): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/user/store', UserData)
+  // async createProfil(id: number, UserData: Profil): Promise<{ message: string; profil: Profil }> {
+  //   const response = await api.put<{ message: string; profil: Profil }>(
+  //     `/user/storeprofil${id}`,
+  //     UserData,
+  //   )
+  //   return response.data
+  // },
+  async editProfil(id: number, UserData: Profil): Promise<{ message: string; profil: Profil }> {
+    const response = await api.put<{ message: string; profil: Profil }>(
+      `/user/updateprofil/${id}`,
+      UserData,
+    )
     return response.data
   },
-  async getUser(id: number): Promise<UserResponse> {
+  async createCustom(userData: Custom): Promise<{ message: string; user: Custom }> {
+    const response = await api.post<{ message: string; user: Custom }>(
+      '/user/storecustombyadmin',
+      userData,
+    )
+    return response.data
+  },
+  async editCustom(id: number, userData: Custom): Promise<{ message: string; user: Custom }> {
+    const response = await api.put<{ message: string; user: Custom }>(
+      `/user/updatecustombyadmin/${id}`,
+      userData,
+    )
+    return response.data
+  },
+  async showUser(id: number): Promise<UserResponse> {
     const response = await api.get<UserResponse>(`/user/show/${id}`)
     return response.data
   },
-  async editUser(id: number, UserData: Custom): Promise<UserResponse> {
-    const response = await api.put<UserResponse>(`/user/update/${id}`, UserData)
+  async createUser(UserData: UserRegister): Promise<{ message: string; user: UserRegister }> {
+    const response = await api.post<{ message: string; user: UserRegister }>(
+      '/user/store',
+      UserData,
+    )
+    return response.data
+  },
+  async editUser(
+    id: number,
+    UserData: UserRegister,
+  ): Promise<{ message: string; user: UserRegister }> {
+    const response = await api.put<{ message: string; user: UserRegister }>(
+      `/user/update/${id}`,
+      UserData,
+    )
     return response.data
   },
 

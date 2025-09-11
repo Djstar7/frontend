@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import type { UserRegister } from '@/types/user'
+import { toastError, toastSuccess } from '@/utils/toastConfig'
 
 interface FormRegister {
   name: string
@@ -18,7 +19,6 @@ const form = ref<FormRegister>({
 })
 
 const error = ref<string | null>(null)
-const loading = ref<boolean>(false)
 
 const userStore = useUserStore()
 
@@ -29,20 +29,19 @@ const handleRegister = async () => {
   }
 
   try {
-    loading.value = true
-    error.value = null
+    userStore.loading = true
+    userStore.error = null
 
     const formRegister: UserRegister = {
       name: form.value.name,
-      email: form.value.email, // ✅ corrigé
+      email: form.value.email,
       password: form.value.password,
     }
 
-    await userStore.register(formRegister)
+    const res = await userStore.register(formRegister)
+    toastSuccess(res.message)
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Erreur lors de l’inscription'
-  } finally {
-    loading.value = false
+    toastError(userStore.error || 'Erreur de la connexion')
   }
 }
 </script>
@@ -91,14 +90,20 @@ const handleRegister = async () => {
     <div class="text-red-600 text-sm mt-2">
       {{ error }}
     </div>
-    <div class="mt-6">
+    <div>
       <button
         type="submit"
-        :disabled="loading"
-        class="w-full text-xl flex justify-center cursor-pointer py-2 px-4 border border-transparent rounded-md shadow-sm font-medium text-white bg-indigo-600 hover:bg-orange-400"
+        :disabled="userStore.loading"
+        class="w-full flex items-center justify-center gap-2 py-2 px-4 text-lg font-medium text-white rounded-xl shadow-md transition-colors duration-300 bg-indigo-600 hover:bg-orange-400 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <span v-if="loading">Chargement...</span>
-        <span v-else>S'inscrire</span>
+        <span v-if="userStore.loading" class="flex items-center gap-2">
+          <i class="fas fa-spinner fa-spin"></i>
+          Connexion...
+        </span>
+        <span v-else class="flex items-center gap-2">
+          <i class="fas fa-sign-in-alt"></i>
+          S'inscrire
+        </span>
       </button>
     </div>
   </form>

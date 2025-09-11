@@ -1,20 +1,20 @@
-import { faqChatService } from '@/services/faqChatService'
-import type { FaqChat } from '@/types/faqchat'
+import { visaTypeService } from '@/services/visaTypeService'
+import type { VisaType } from '@/types/visa'
 import { toastInfo } from '@/utils/toastConfig'
 import { defineStore } from 'pinia'
 
-export const useFaqChatStore = defineStore('faqchat', {
+export const useVisaTypeStore = defineStore('VisaType', {
   state: () => ({
     loading: false,
     error: null,
   }),
   actions: {
-    async getFaqChat() {
-      toastInfo('Chargement des Quiz en cours...')
+    async getVisaType() {
+      toastInfo('Chargement des types de visa en cours...')
       this.loading = true
       this.error = null
       try {
-        return await faqChatService.getFaqChat()
+        return await visaTypeService.getVisatype()
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Echec du chargement'
         throw err
@@ -22,27 +22,25 @@ export const useFaqChatStore = defineStore('faqchat', {
         this.loading = false
       }
     },
-    async createFaqChat(faqChatData: FaqChat) {
-      toastInfo('Création des Quiz en cours...')
+    async createVisaType(visaTypeData: VisaType) {
+      toastInfo('Creation des types de visa en cours...')
       this.loading = true
       this.error = null
-
       try {
-        const response = await faqChatService.createFaqChat(faqChatData)
-        return response
+        return await visaTypeService.createVisatype(visaTypeData)
       } catch (err: any) {
-        this.error = err.response?.data?.message || 'Échec lors de la création'
+        this.error = err.response?.data?.message || 'Echec lors de la creation'
         throw err
       } finally {
         this.loading = false
       }
     },
-    async showFaqChat(id: number) {
-      toastInfo('Chargement des Quiz pour une demande en cours...')
+    async showVisaType(id: number) {
+      toastInfo('Chargement des types de visa pour une demande en cours...')
       this.loading = true
       this.error = null
       try {
-        return await faqChatService.showFaqChat(id)
+        return await visaTypeService.showVisatype(id)
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Echec du chargement'
         throw err
@@ -50,12 +48,12 @@ export const useFaqChatStore = defineStore('faqchat', {
         this.loading = false
       }
     },
-    async editFaqChat(id: number, faqChatData: FaqChat) {
-      toastInfo('Mise a jour des Quiz en cours...')
+    async editVisaType(id: number, visaTypeData: VisaType) {
+      toastInfo('Mise a jour des types de visa en cours...')
       this.loading = true
       this.error = null
       try {
-        return await faqChatService.editFaqChat(id, faqChatData)
+        return await visaTypeService.editVisatype(id, visaTypeData)
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Echec de la Mise a jour'
         throw err
@@ -63,12 +61,12 @@ export const useFaqChatStore = defineStore('faqchat', {
         this.loading = false
       }
     },
-    async deleteFaqChat(id: number) {
-      toastInfo('Mise a jour des Quiz en cours...')
+    async deleteVisaType(id: number) {
+      toastInfo('Mise a jour des types de visa en cours...')
       this.loading = true
       this.error = null
       try {
-        return await faqChatService.deleteFaqChat(id)
+        return await visaTypeService.deleteVisatype(id)
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Echec de la Mise a jour'
         throw err

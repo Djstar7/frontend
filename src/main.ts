@@ -5,8 +5,6 @@ import App from './App.vue'
 import router from './router'
 import Vue3Toastify from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
-import type { ToastActions } from 'vue3-toastify'
-
 // import { useUserStore } from './stores/userStore' // Importez le store utilisateur
 
 const app = createApp(App)

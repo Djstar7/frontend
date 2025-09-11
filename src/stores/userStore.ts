@@ -2,46 +2,43 @@
 import { defineStore } from 'pinia'
 import userService from '@/services/userService'
 import router from '@/router'
-import { toast } from 'vue3-toastify'
-import type { UserLogin, UserState, UserRegister, Custom } from '@/types/user'
+import type { UserLogin, UserState, UserRegister, Custom, Profil } from '@/types/user'
+import { toastInfo, toastError } from '@/utils/toastConfig'
+
+function safeParse(item: string | null) {
+  if (!item || item === 'undefined' || item === 'null') return null
+  try {
+    return JSON.parse(item)
+  } catch {
+    return null
+  }
+}
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    user: safeParse(localStorage.getItem('user')),
+    profil: safeParse(localStorage.getItem('profil')),
+    custom: safeParse(localStorage.getItem('custom')),
     token: localStorage.getItem('access_token'),
     isAuthenticated: !!localStorage.getItem('access_token'),
     loading: false,
     error: null,
   }),
-
+  getters: {
+    role: (state) => state.user?.role,
+  },
   actions: {
-    notifySuccess(msg: string) {
-      toast.success(msg)
-    },
-
-    notifyError(msg: string) {
-      toast.error(msg)
-    },
-    notifyLoading(msg: string) {
-      toast.loading(msg)
-    },
     async register(data: UserRegister) {
+      toastInfo('Enregistrement en cours...')
       this.loading = true
       this.error = null
       try {
         const response = await userService.register(data)
-        this.token = response.access_token
-        this.user = response.user
-        this.isAuthenticated = true
-
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('access_token', this.token)
-        localStorage.setItem('user', JSON.stringify(this.user))
-
-        await router.push({ name: 'custom.dashboard' })
+        this.setAuth(response.user, response.access_token)
+        await this.redirectDashboard()
+        return response
       } catch (err: any) {
-        this.error = err.response?.data?.message || "Échec de l'enregistrement."
-        this.resetAuth()
+        this.handleError(err, "Échec de l'enregistrement")
         throw err
       } finally {
         this.loading = false
@@ -49,23 +46,16 @@ export const useUserStore = defineStore('user', {
     },
 
     async login(credentials: UserLogin) {
+      toastInfo('Connexion en cours...')
       this.loading = true
       this.error = null
       try {
         const response = await userService.login(credentials)
-        this.token = response.access_token
-        this.user = response.user
-        this.isAuthenticated = true
-
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('access_token', this.token)
-        localStorage.setItem('user', JSON.stringify(this.user))
-
-        await router.push({ name: 'custom.dashboard' })
+        this.setAuth(response.user, response.access_token)
+        await this.redirectDashboard()
+        return response
       } catch (err: any) {
-        this.error =
-          err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.'
-        this.resetAuth()
+        this.handleError(err, 'Échec de la connexion. Vérifiez vos identifiants.')
         throw err
       } finally {
         this.loading = false
@@ -73,111 +63,198 @@ export const useUserStore = defineStore('user', {
     },
 
     async logout() {
+      toastInfo('Déconnexion en cours...')
       this.loading = true
       this.error = null
       try {
-        // await userService.logout() // optionnel côté serveur
+        // Optionnel côté serveur : await userService.logout()
       } catch (err: any) {
-        this.error = err.response?.data?.message || 'Erreur lors de la déconnexion.'
+        this.handleError(err, 'Erreur lors de la déconnexion')
       } finally {
         this.resetAuth()
         await router.push({ name: 'auth.login' })
         this.loading = false
       }
     },
-    async getUsers() {
+
+    async getUser() {
+      toastInfo('Chargement des utilisateurs...')
+      this.loading = true
+      this.error = null
       try {
-        return await userService.getUsers()
-      } catch (e: any) {
-        console.error(
-          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
-        )
-      }
-    },
-    async createUser(UserData: Custom) {
-      try {
-        return await userService.createUser(UserData)
-      } catch (e: any) {
-        console.error(
-          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
-        )
+        return await userService.getUser()
+      } catch (err: any) {
+        this.handleError(err, 'Erreur lors de la récupération des utilisateurs')
+        throw err
+      } finally {
+        this.loading = false
       }
     },
 
-    async getUser(id: number) {
+    async createProfil(id: number, data: Profil) {
+      toastInfo("Création de l'utilisateur...")
+      this.loading = true
+      this.error = null
       try {
-        return await userService.getUser(id)
-      } catch (e: any) {
-        console.error(
-          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
-        )
+        const response = await userService.createProfil(id, data)
+        this.profil = response.profil
+        localStorage.setItem('profil', JSON.stringify(this.profil))
+        return response
+      } catch (err: any) {
+        this.handleError(err, "Erreur lors de la création de l'utilisateur")
+        throw err
+      } finally {
+        this.loading = false
       }
     },
-    async editUser(id: number, UserData: Custom) {
+    async editProfil(id: number, data: Profil) {
+      toastInfo("Création de l'utilisateur...")
+      this.loading = true
+      this.error = null
       try {
-        const response = await userService.editUser(id, UserData)
-        this.user = response.user
-        this.isAuthenticated = true
+        const response = await userService.editProfil(id, data)
+        this.profil = response.profil
+        localStorage.setItem('profil', JSON.stringify(this.profil))
+        return response
+      } catch (err: any) {
+        this.handleError(err, "Erreur lors de la création de l'utilisateur")
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
 
-        localStorage.setItem('user', JSON.stringify(this.user))
-        await router.push({ name: 'custom.profil' })
-      } catch (e: any) {
-        console.error(
-          e.response?.data?.message || 'Erreur lors de la récupération des utilisateurs',
-        )
+    async createCustom(userData: Custom) {
+      toastInfo("Creation  d'un nouveau client...")
+      this.loading = true
+      this.error = null
+      try {
+        return await userService.createCustom(userData)
+      } catch (err: any) {
+        this.handleError(err, "Erreur lors de la creation de l'utilisateur")
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    async showUser(id: number) {
+      toastInfo("Chargement de l'utilisateur...")
+      this.loading = true
+      this.error = null
+      try {
+        return await userService.showUser(id)
+      } catch (err: any) {
+        this.handleError(err, "Erreur lors de la récupération de l'utilisateur")
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    async createUser(data: UserRegister) {
+      toastInfo("Creation de l'utilisateur...")
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.createUser(data)
+        return response
+      } catch (err: any) {
+        this.handleError(err, 'Erreur lors de la creation')
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    async editUser(id: number, data: UserRegister) {
+      toastInfo("Mise a jour de l'utilisateur...")
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.editUser(id, data)
+        if (this.user?.id === id) {
+          this.user = response.user
+          this.isAuthenticated = true
+          localStorage.setItem('user', JSON.stringify(this.user))
+        }
+        return response
+      } catch (err: any) {
+        this.handleError(err, 'Erreur lors de la mise à jour')
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async editCustom(id: number, data: Custom) {
+      toastInfo('Mise à jour du client...')
+      this.loading = true
+      this.error = null
+      try {
+        const response = await userService.editCustom(id, data)
+        return response
+      } catch (err: any) {
+        this.handleError(err, 'Erreur lors de la mise à jour')
+        throw err
+      } finally {
+        this.loading = false
       }
     },
 
     async deleteUser(id: number) {
+      toastInfo("Suppression de l'utilisateur...")
       this.loading = true
       this.error = null
       try {
-        await userService.deleteUser(id)
+        return await userService.deleteUser(id)
       } catch (err: any) {
-        this.error = err.response?.data?.message || 'Erreur lors de la déconnexion.'
-      } finally {
-        await router.push({ name: 'custom.profil' })
-        this.loading = false
-      }
-    },
-
-    async fetchCurrentUser() {
-      if (!this.token) return
-
-      this.loading = true
-      this.error = null
-      try {
-        const response = await userService.fetchUser()
-        this.user = response.user
-        this.isAuthenticated = true
-
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('user', JSON.stringify(this.user))
-      } catch (err: any) {
-        console.error("Erreur lors de la récupération de l'utilisateur :", err)
-        this.resetAuth()
-
-        // Si l'erreur est 401 (Unauthorized), rediriger vers login
-        if (err.response && err.response.status === 401) {
-          await router.push({ name: 'auth.login' })
-        }
+        this.handleError(err, 'Erreur lors de la suppression')
+        throw err
       } finally {
         this.loading = false
       }
     },
 
-    async initializeAuth() {
-      if (this.token && !this.user) {
-        await this.fetchCurrentUser()
-      }
+    // Utils internes
+    setAuth(user: UserRegister, token: string) {
+      this.user = user
+      this.token = token
+      this.isAuthenticated = true
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('access_token', token)
     },
 
     resetAuth() {
       this.user = null
       this.token = null
       this.isAuthenticated = false
-      localStorage.removeItem('access_token')
       localStorage.removeItem('user')
+      localStorage.removeItem('access_token')
+    },
+
+    handleError(err: any, defaultMessage: string) {
+      this.error = err.response?.data?.message || defaultMessage
+      toastError(this.error!)
+    },
+    loadUserFromLocalStorage() {
+      const stored = localStorage.getItem('user')
+      if (stored) this.user = JSON.parse(stored)
+      toastInfo("Chargement de l'utilisateur depuis le localStorage")
+    },
+
+    async redirectDashboard() {
+      if (!this.user?.role) return
+      switch (this.user.role) {
+        case 'admin':
+          await router.push({ name: 'admin.dashboard' })
+          break
+        case 'custom':
+          await router.push({ name: 'custom.dashboard' })
+          break
+        case 'agent':
+          await router.push({ name: 'agent.visarequest' })
+          break
+        default:
+          await router.push({ name: 'auth.login' })
+      }
     },
   },
 })

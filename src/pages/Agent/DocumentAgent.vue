@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>MEssages</div>
+  <div>Document</div>
 </template>
 
 <style></style>

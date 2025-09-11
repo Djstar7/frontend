@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import NavbarPartial from '@/components/NavbarPartial.vue'
-import SidebarComponentVue from '@/components/SidebarComponent.vue.vue'
+import SidebarCustom from '@/components/SidebarCustom.vue'
 </script>
 <template>
   <NavbarPartial />
   <div class="flex">
-    <SidebarComponentVue class="mt-20" />
-    <router-view class="ml-50 mt-20" />
+    <SidebarCustom class="mt-20" />
+    <router-view class="md:ml-50 flex-1 ml-20 mt-20 min-w-[88.5vw]" />
   </div>
 </template>

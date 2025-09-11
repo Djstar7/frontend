@@ -54,3 +54,5 @@ export const toastWarning = (msg: string, pos: ToastPosition = 'top-right') =>
 
 export const toastError = (msg: string, pos: ToastPosition = 'top-right') =>
   showToast(msg, 'error', pos)
+export const toastLoading = (msg: string, pos: ToastPosition = 'top-center') =>
+  showToast(msg, 'loading', pos)

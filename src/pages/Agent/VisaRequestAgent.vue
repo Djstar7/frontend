@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>MEssages</div>
+  <div>Visa request</div>
 </template>
 
 <style></style>

@@ -2,32 +2,21 @@
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import type { UserLogin } from '@/types/user'
-import { toastError, toastInfo, toastSuccess } from '@/utils/toastConfig'
+import { toastError, toastSuccess } from '@/utils/toastConfig'
 
 const form = ref<UserLogin>({
   email: '',
   password: '',
 })
 
-const error = ref<string | null>(null)
-const loading = ref<boolean>(false)
-
 const userStore = useUserStore()
 
 const handleLogin = async () => {
   try {
-    loading.value = true
-    error.value = null
-
-    toastInfo('Connexion en cours...')
-
-    await userStore.login(form.value)
-    toastSuccess('Connexion reussie')
+    const res = await userStore.login(form.value)
+    toastSuccess(res.message)
   } catch (err: any) {
-    error.value = err.response?.data?.message || ''
-    toastError('Erreur lors de l’inscription')
-  } finally {
-    loading.value = false
+    toastError(userStore.error || 'Erreur lors de la connexion')
   }
 }
 </script>
@@ -68,9 +57,16 @@ const handleLogin = async () => {
       <button
         type="submit"
         :disabled="userStore.loading"
-        class="w-full flex justify-center py-2 px-4 text-xl border border-transparent rounded-md shadow-md text-md font-medium text-white bg-indigo-600 hover:bg-orange-400 cursor-pointer"
+        class="w-full flex items-center justify-center gap-2 py-2 px-4 text-lg font-medium text-white rounded-xl shadow-md transition-colors duration-300 bg-indigo-600 hover:bg-orange-400 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <span :aria-disabled="userStore.loading">Se connecter</span>
+        <span v-if="userStore.loading" class="flex items-center gap-2">
+          <i class="fas fa-spinner fa-spin"></i>
+          Connexion...
+        </span>
+        <span v-else class="flex items-center gap-2">
+          <i class="fas fa-sign-in-alt"></i>
+          Se connecter
+        </span>
       </button>
     </div>
   </form>

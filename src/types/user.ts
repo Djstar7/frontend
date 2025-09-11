@@ -3,6 +3,7 @@ type Gender = 'male' | 'female'
 type StatusMat = 'single' | 'married' | 'divorced' | 'widowed'
 
 interface UserRegister {
+  id?: number
   name: string
   email: string
   password?: string
@@ -24,15 +25,16 @@ interface Profil {
   date_of_birth: string
   place_of_birth: string
   status_mat: StatusMat
-  country_name: string
+  nationality: string
 }
 
 interface Custom {
-  id: number
+  id?: number
   name: string
   email: string
   phone: string
-  password: string
+  password?: string
+  password_confirmation?: string
   role?: Role
   first_name: string
   last_name: string
@@ -40,14 +42,26 @@ interface Custom {
   date_of_birth: string
   place_of_birth: string
   status_mat: StatusMat
-  country_name: string
+  nationality: string
+  // visa_type_name?: string
 }
 
 interface UserState {
   user: UserRegister | null
+  profil: Profil | null
+  custom: Custom | null
   token: string | null
   isAuthenticated: boolean
   loading: boolean
   error: string | null
 }
-export type { UserRegister, UserLogin, Profil, UserState, UserForgotPassword, Role, Custom }
+export type {
+  UserRegister,
+  UserLogin,
+  Profil,
+  UserState,
+  UserForgotPassword,
+  Role,
+  Custom,
+  StatusMat,
+}

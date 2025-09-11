@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useApiStore } from '@/stores/faqchatore'
+import { useFaqChatStore } from '@/stores/faqchatore'
 import type { FaqChat } from '@/types/faqchat'
 
-const apiStore = useApiStore()
+const faqChatStore = useFaqChatStore()
 
 const questions = ref<FaqChat[]>([])
 
 onMounted(async () => {
   try {
-    const res = await apiStore.index('/faqchat')
+    const res = await faqChatStore.getFaqChat()
     questions.value = res
     console.log('res disponibles:', res)
   } catch (e: any) {
-    console.error('Erreur:', apiStore.error)
+    console.error('Erreur:', faqChatStore.error)
   }
 })
 

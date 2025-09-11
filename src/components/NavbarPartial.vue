@@ -78,7 +78,7 @@
         </router-link>
         <router-link
           :to="{ name: 'about' }"
-          class="rblock px-6 py-3 text-gray-700 text-lg hover:text-purple items-center gap-2"
+          class="rblock px-6 py-3 text-gray-700 text-lg hover:text-purple-600 items-center gap-2"
         >
           <i class="fas fa-info-circle"></i>À propos
           <span
@@ -86,11 +86,12 @@
           ></span>
         </router-link>
         <div class="flex flex-col px-6 py-4 gap-3">
-          <button
+          <router-link
+            :to="{ name: 'custom.dashboard' }"
             class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-orange-400 text-white rounded-lg hover:scale-105 transition-all"
           >
             Commencerle suivi
-          </button>
+          </router-link>
         </div>
       </div>
     </transition>

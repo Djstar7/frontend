@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>MEssages</div>
+  <div>Profil</div>
 </template>
 
 <style></style>
