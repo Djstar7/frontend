@@ -20,7 +20,7 @@ const form = ref<VisaFetch>({
   processing_duration_min: null,
   processing_duration_max: null,
   status_mat: 'single',
-  age: null,
+  age: 50,
   documents: [] as string[],
 })
 const countrys = ref<Country[]>([])
@@ -326,7 +326,7 @@ const submitForm = async () => {
           max="100"
           class="w-full h-2 bg-gray-200 rounded-lg cursor-pointer accent-orange-400"
         />
-        <div class="text-xs text-gray-500 mt-1 text-right">{{ form.age || 50 }} ans</div>
+        <div class="text-xs text-gray-500 mt-1 text-right">{{ form.age }} ans</div>
       </div>
 
       <!-- Documents -->
@@ -357,7 +357,13 @@ const submitForm = async () => {
             class="bg-gray-100 px-2 py-1 rounded-full flex items-center gap-1 text-xs"
           >
             {{ doc }}
-            <button type="button" @click="removeDocument(index)" class="text-red-500">x</button>
+            <button
+              type="button"
+              @click="removeDocument(index)"
+              class="text-red-500 cursor-pointer"
+            >
+              x
+            </button>
           </li>
         </transition-group>
       </div>

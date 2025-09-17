@@ -1,3 +1,20 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { ref } from 'vue'
+const open = ref(false)
+
+const router = useRouter()
+
+// Nom de la route actuelle
+const routeName = computed(() => router.currentRoute.value.name as string)
+
+// Vérifie si le nom de la route commence par custom, admin ou agent
+const isName = computed(() =>
+  ['custom', 'admin', 'agent'].some((prefix) => routeName.value?.startsWith(prefix)),
+)
+</script>
+
 <template>
   <header class="bg-white/80 backdrop-blur-md fixed w-full shadow-md top-0 z-50 transition-all">
     <div
@@ -45,6 +62,7 @@
 
         <!-- CTA Principal -->
         <router-link
+          v-if="!isName"
           :to="{ name: 'custom.dashboard' }"
           class="ml-6 px-6 py-2 text-white lg:text-xl font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-400 rounded-full shadow-md hover:scale-105 hover:shadow-lg transition-all animate-gradient"
         >
@@ -85,7 +103,7 @@
             class="absolute left-0 -bottom-1 w-0 h-[2px] bg-purple-600 group-hover:w-full transition-all"
           ></span>
         </router-link>
-        <div class="flex flex-col px-6 py-4 gap-3">
+        <div class="flex flex-col px-6 py-4 gap-3" v-if="!isName">
           <router-link
             :to="{ name: 'custom.dashboard' }"
             class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-orange-400 text-white rounded-lg hover:scale-105 transition-all"
@@ -97,12 +115,6 @@
     </transition>
   </header>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-const open = ref(false)
-</script>
-
 <style scoped>
 @keyframes gradient-x {
   0%,

@@ -1,4 +1,7 @@
 <script setup lang="ts"></script>
+
 <template>
-  <div>Message</div>
+  <div>CHat</div>
 </template>
+
+<style></style>

@@ -10,7 +10,12 @@ interface VisaRequest {
   destination_country_id: number
   status: StatusVisa
 }
-
+interface VisaRequestPayload {
+  user_id: number
+  country_dest_name: string
+  visa_type_name: string
+  nationality: string
+}
 interface VisaType {
   id: number
   name: string
@@ -18,7 +23,7 @@ interface VisaType {
 }
 interface Visa {
   user_id: number
-  country_dest_name?: string
+  country_dest_name: string
   visa_type_name: string
 }
 interface VisaFetch {
@@ -33,4 +38,4 @@ interface VisaFetch {
   age: number | null
   documents: string[]
 }
-export type { VisaRequest, VisaType, Visa, VisaFetch }
+export type { VisaRequest, VisaType, Visa, VisaFetch, VisaRequestPayload }

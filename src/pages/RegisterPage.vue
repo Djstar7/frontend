@@ -50,7 +50,7 @@ const handleRegister = async () => {
   <h2 class="text-3xl font-bold text-center text-purple-600 mb-6">Inscription</h2>
   <form @submit.prevent="handleRegister" class="space-y-4">
     <div>
-      <label for="name" class="block text-md font-medium text-gray-700">Nom</label>
+      <label for="name" class="block text-md font-medium text-gray-700">Pseudo</label>
       <input
         type="text"
         id="name"

@@ -43,7 +43,7 @@ const menuLinks = ref([
   { label: 'Dashboard', name: 'custom.dashboard', icon: 'tachometer-alt' },
   { label: 'Documents', name: 'custom.documents', icon: 'file-alt' },
   { label: 'Paiement', name: 'custom.payment', icon: 'credit-card' },
-  { label: 'Demande Visa', name: 'custom.requestvisa', icon: 'plane' },
+  { label: 'Demande Visa', name: 'custom.visarequest.get', icon: 'plane' },
   { label: 'Notifications', name: 'custom.notification', icon: 'bell' },
   { label: 'Message', name: 'custom.chat', icon: 'message' },
   { label: 'Rendez-vous', name: 'custom.appoitment', icon: 'calendar-check' },

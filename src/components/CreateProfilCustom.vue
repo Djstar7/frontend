@@ -16,6 +16,9 @@ const form = ref<Profil>({
   status_mat: 'single',
   nationality: '',
 })
+const emit = defineEmits<{
+  (e: 'created'): void
+}>()
 
 const handleSubmit = async () => {
   try {
@@ -24,7 +27,8 @@ const handleSubmit = async () => {
 
     const { id } = userStore.user
 
-    await userStore.createProfil(id!, form.value)
+    await userStore.editProfil(id!, form.value)
+    emit('created')
     toastSuccess('Profil client créé avec succès')
   } catch (err: any) {
     toastError(userStore.error || 'Erreur lors de la création du profil')

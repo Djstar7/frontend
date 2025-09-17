@@ -13,11 +13,11 @@
 
       <!-- Texte overlay -->
       <div class="absolute w-full text-center top-1/2 transform -translate-y-1/2 px-4">
-        <p
+        <div
           class="typewriter text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-xl"
         >
           {{ displayedText }}
-        </p>
+        </div>
       </div>
     </div>
   </div>
@@ -80,6 +80,7 @@ watch(currentIndex, (newIndex) => {
   border-right: 2px solid white;
   word-wrap: break-word; /* coupe les mots si besoin */
   animation: blink-caret 0.7s step-end infinite;
+  display: flex;
 }
 
 @keyframes blink-caret {

@@ -20,6 +20,7 @@ const handleSubmit = async () => {
       if (role == 'admin') {
         await userStore.editCustom(id!, form)
       } else {
+        console.log('Profil a enregistrer', form)
         await userStore.editProfil(id!, form)
       }
     } else {

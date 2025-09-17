@@ -3,11 +3,20 @@ import type { Visa, VisaFetch } from '@/types/visa'
 import { toastInfo } from '@/utils/toastConfig'
 import { defineStore } from 'pinia'
 
+function safeParse(item: string | null) {
+  if (!item || item === 'undefined' || item === 'null') return null
+  try {
+    return JSON.parse(item)
+  } catch {
+    return null
+  }
+}
 export const useVisaStore = defineStore('visa', {
   state: () => ({
     loading: false,
     error: null,
-    visa: null,
+    visa: safeParse(localStorage.getItem('visa')),
+    visarequest: safeParse(localStorage.getItem('visarequest')),
   }),
   actions: {
     async getVisa() {
@@ -31,7 +40,7 @@ export const useVisaStore = defineStore('visa', {
       try {
         const response = await visaService.createVisa(visaData)
         this.visa = response
-        localStorage.setItem('visa', JSON.stringify(response))
+        console.log('Data sauvegarder', localStorage.setItem('visa', JSON.stringify(response)))
         return response
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Échec lors de la création'
@@ -49,7 +58,10 @@ export const useVisaStore = defineStore('visa', {
       try {
         const response = await visaService.createStoreVisa(visaData)
         this.visa = response
+        this.visarequest = visaData
         localStorage.setItem('visa', JSON.stringify(response))
+        localStorage.setItem('visarequest', JSON.stringify(visaData))
+        console.log('donee recus ', response)
         return response
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Échec lors de la création'
@@ -89,6 +101,9 @@ export const useVisaStore = defineStore('visa', {
       toastInfo('Mise a jour des documents requis en cours...')
       this.loading = true
       this.error = null
+      this.visarequest = null
+      this.visa = null
+      localStorage.removeItem('visarequest')
       try {
         return await visaService.deleteVisa(id)
       } catch (err: any) {

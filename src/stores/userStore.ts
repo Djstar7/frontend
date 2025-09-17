@@ -32,6 +32,7 @@ export const useUserStore = defineStore('user', {
       toastInfo('Enregistrement en cours...')
       this.loading = true
       this.error = null
+      this.profil = null
       try {
         const response = await userService.register(data)
         this.setAuth(response.user, response.access_token)
@@ -91,22 +92,22 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    async createProfil(id: number, data: Profil) {
-      toastInfo("Création de l'utilisateur...")
-      this.loading = true
-      this.error = null
-      try {
-        const response = await userService.createProfil(id, data)
-        this.profil = response.profil
-        localStorage.setItem('profil', JSON.stringify(this.profil))
-        return response
-      } catch (err: any) {
-        this.handleError(err, "Erreur lors de la création de l'utilisateur")
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
+    // async createProfil(id: number, data: Profil) {
+    //   toastInfo("Création de l'utilisateur...")
+    //   this.loading = true
+    //   this.error = null
+    //   try {
+    //     const response = await userService.createProfil(id, data)
+    //     this.profil = response.profil
+    //     localStorage.setItem('profil', JSON.stringify(this.profil))
+    //     return response
+    //   } catch (err: any) {
+    //     this.handleError(err, "Erreur lors de la création de l'utilisateur")
+    //     throw err
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
     async editProfil(id: number, data: Profil) {
       toastInfo("Création de l'utilisateur...")
       this.loading = true
@@ -114,7 +115,10 @@ export const useUserStore = defineStore('user', {
       try {
         const response = await userService.editProfil(id, data)
         this.profil = response.profil
+        console.log('Profil mis a jour : ', response.profil)
+
         localStorage.setItem('profil', JSON.stringify(this.profil))
+        console.log('Profil : ', this.profil)
         return response
       } catch (err: any) {
         this.handleError(err, "Erreur lors de la création de l'utilisateur")
