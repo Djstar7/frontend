@@ -22,22 +22,22 @@ export const useDocumentStore = defineStore('document', {
         this.loading = false
       }
     },
-    async createDocument(visaData: DocumentPayload) {
-      toastInfo('Création de la demande de visa en cours...')
-      this.loading = true
-      this.error = null
+    // async createDocument(visaData: DocumentPayload) {
+    //   toastInfo('Création de la demande de visa en cours...')
+    //   this.loading = true
+    //   this.error = null
 
-      try {
-        const response = await documentService.createDocument(visaData)
-        this.visa = response
-        return response
-      } catch (err: any) {
-        this.error = err.response?.data?.message || 'Échec lors de la création'
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
+    //   try {
+    //     const response = await documentService.createDocument(visaData)
+    //     this.visa = response
+    //     return response
+    //   } catch (err: any) {
+    //     this.error = err.response?.data?.message || 'Échec lors de la création'
+    //     throw err
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
     async showDocument(id: number) {
       toastInfo('Chargement de la demande de visa pour une demande en cours...')
       this.loading = true
@@ -51,12 +51,38 @@ export const useDocumentStore = defineStore('document', {
         this.loading = false
       }
     },
-    async editDocument(id: number, visaData: DocumentPayload) {
+    async showDocumentByCustom(id: number) {
+      toastInfo('Chargement de la demande de visa pour une demande en cours...')
+      this.loading = true
+      this.error = null
+      try {
+        return await documentService.showDocumentByCustom(id)
+      } catch (err: any) {
+        this.error = err.response?.data?.message || 'Echec du chargement'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    async showDocumentByVisaRequest(id: number) {
+      toastInfo('Chargement de la demande de visa pour une demande en cours...')
+      this.loading = true
+      this.error = null
+      try {
+        return await documentService.showDocumentByVisaRequest(id)
+      } catch (err: any) {
+        this.error = err.response?.data?.message || 'Echec du chargement'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+    async editDocument(id: number, documentData) {
       toastInfo('Mise a jour de la demande de visa en cours...')
       this.loading = true
       this.error = null
       try {
-        return await documentService.editDocument(id, visaData)
+        return await documentService.editDocument(id, documentData)
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Echec de la Mise a jour'
         throw err

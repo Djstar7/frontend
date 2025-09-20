@@ -78,7 +78,7 @@ export const useVisaRequestStore = defineStore('visarequest', {
         this.loading = false
       }
     },
-    async editVisaRequest(id: number, visaData: VisaRequestPayload) {
+    async editVisaRequest(id: number, visaData) {
       toastInfo('Mise a jour de la demande de visa en cours...')
       this.loading = true
       this.error = null

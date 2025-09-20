@@ -18,7 +18,7 @@ export const visaRequestService = {
     const response = await api.get(`/visarequest/showbyuser/${id}`)
     return response.data
   },
-  async editVisaRequest(id: number, visaRequestData: VisaRequestPayload) {
+  async editVisaRequest(id: number, visaRequestData) {
     const response = await api.put(`/visarequest/update/${id}`, visaRequestData)
     return response.data
   },

@@ -30,7 +30,6 @@ import VisaRequestCustom from '@/pages/Custom/VisaRequestCustom.vue'
 import UploadDocument from '@/components/UploadDocument.vue'
 import ReceiptVisaRequest from '@/components/ReceiptVisaRequest.vue'
 import ShowVisaRequest from '@/components/ShowVisaRequest.vue'
-import VisaRequest from '@/components/VisaRequest.vue'
 import CreateVisaRequest from '@/components/CreateVisaRequest.vue'
 import ViewListDocument from '@/components/VisaRequest/ViewListDocument.vue'
 
@@ -54,6 +53,9 @@ import VisaRequestAgent from '@/pages/Agent/VisaRequestAgent.vue'
 import NotificationAgent from '@/pages/Agent/NotificationAgent.vue'
 import AppoitmentAgent from '@/pages/Agent/AppoitmentAgent.vue'
 import ChatAgent from '@/pages/Agent/ChatAgent.vue'
+import VisaRequest from '@/components/VisaRequest.vue'
+import ShowVisaRequestAgent from '@/components/Agent/ShowVisaRequest.vue'
+import ViewDocument from '@/components/Agent/ViewDocument.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -147,6 +149,47 @@ const router = createRouter({
         { path: 'appoitment', name: 'agent.appoitment', component: AppoitmentAgent },
         { path: 'notification', name: 'agent.notification', component: NotificationAgent },
         { path: 'chat', name: 'agent.chat', component: ChatAgent },
+        {
+          path: 'users',
+          children: [
+            { path: '', name: 'agent.users', component: VisaRequestAgent },
+            {
+              path: ':userId',
+              children: [
+                {
+                  path: 'visarequest',
+                  children: [
+                    {
+                      path: '',
+                      name: 'agent.users.show.visarequest',
+                      component: VisaRequest,
+                    },
+                    {
+                      path: ':visaRequestId',
+                      children: [
+                        {
+                          path: '',
+                          name: 'agent.users.show.visarequest.show',
+                          component: ShowVisaRequestAgent,
+                        },
+                        {
+                          path: 'document',
+                          children: [
+                            {
+                              path: '',
+                              name: 'agent.users.show.visarequest.show.document',
+                              component: ViewDocument,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],

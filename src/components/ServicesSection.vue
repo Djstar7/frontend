@@ -25,7 +25,7 @@
           <i class="fa-solid fa-upload text-5xl mb-4 text-purple-600"></i>
           <h3 class="text-2xl font-semibold mb-2">Téléversement & Suivi</h3>
           <p>
-            Téléversez vos documents et suivez en temps réel l’avancement via notifications et
+            Téléversez vos documents et suivez en temps réel l’avancement via messages et
             suggestions de nos agents.
           </p>
         </div>

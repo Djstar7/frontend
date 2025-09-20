@@ -1,8 +1,4 @@
-<script setup lang="ts">
-const emit = defineEmits<{
-  (e: 'created'): void
-}>()
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div></div>

@@ -14,15 +14,8 @@ const handleSubmit = async () => {
     if (!userStore.user) userStore.loadUserFromLocalStorage()
     if (!userStore.user) throw new Error('Aucun utilisateur trouvé')
 
-    const { role } = userStore.user
-
     if (form.role == 'custom') {
-      if (role == 'admin') {
-        await userStore.editCustom(id!, form)
-      } else {
-        console.log('Profil a enregistrer', form)
-        await userStore.editProfil(id!, form)
-      }
+      await userStore.editCustom(id!, form)
     } else {
       await userStore.editUser(id!, form)
     }

@@ -9,6 +9,7 @@ interface LoginData {
 export interface AuthResponse {
   message: string
   user: UserRegister
+  profil?: Profil
   access_token: string
   token_type: string
 }
@@ -32,6 +33,10 @@ const userService = {
   },
   async getUser(): Promise<UserResponse[]> {
     const response = await api.get<UserResponse[]>('/user')
+    return response.data
+  },
+  async getCustom(): Promise<UserResponse[]> {
+    const response = await api.get<UserResponse[]>('/usercustom')
     return response.data
   },
   // async createProfil(id: number, UserData: Profil): Promise<{ message: string; profil: Profil }> {

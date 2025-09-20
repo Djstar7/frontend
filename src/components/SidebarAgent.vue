@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -25,20 +25,37 @@ library.add(
   faUserShield,
 )
 
+// Récupération utilisateur stocké
 const agent = ref<Custom | null>(null)
 const storedUser = localStorage.getItem('user')
-if (storedUser) agent.value = JSON.parse(storedUser) as Custom
+if (storedUser) {
+  agent.value = JSON.parse(storedUser) as Custom
+}
 
 const userStore = useUserStore()
 
-const logout = async () => {
+// Charger user si pas encore défini
+if (!userStore.user) {
+  userStore.loadUserFromLocalStorage()
+}
+if (!userStore.user) {
+  throw new Error('Aucun utilisateur trouvé')
+}
+
+// Déconnexion
+const logout = () => {
   userStore.logout()
 }
+
+// Nom utilisateur
+const userName = computed(() => {
+  return userStore.user?.name || 'Invité'
+})
 </script>
 
 <template>
   <nav
-    class="bg-gray-50 fixed md:w-60 w-20 flex flex-col justify-between border-r border-gray-200 min-h-screen shadow-lg"
+    class="bg-gray-50 fixed md:w-50 w-20 flex flex-col justify-between border-r border-gray-200 min-h-screen shadow-lg"
   >
     <!-- Menu principal -->
     <ul class="space-y-3 p-4 relative">
@@ -61,7 +78,7 @@ const logout = async () => {
           active-class="bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white"
         >
           <font-awesome-icon icon="clipboard-check" class="mr-3 text-lg" />
-          <span class="hidden md:block">Demandes Visa</span>
+          <span class="hidden md:block">Demande Visa</span>
         </router-link>
       </li>
 
@@ -131,7 +148,7 @@ const logout = async () => {
           class="mr-3 text-xl text-purple-600 group-hover:text-purple-800 transition-colors duration-200"
         />
         <div class="flex flex-col">
-          <span class="font-semibold text-gray-600">{{ user?.name || 'Utilisateur' }}</span>
+          <span class="font-semibold text-gray-600">{{ userName }}</span>
           <span class="text-sm group-hover:text-purple-600 transition-colors duration-200">
             Voir profil
           </span>

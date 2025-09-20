@@ -8,11 +8,11 @@ import { useCountryStore } from '@/stores/countryStore'
 import { useVisaStore } from '@/stores/visaStore'
 import { useUserStore } from '@/stores/userStore'
 import { useRouter } from 'vue-router'
+import { vOnClickOutside } from '@vueuse/components'
 import CreateProfilCustom from './CreateProfilCustom.vue'
 
 // ---------------- ÉTATS ----------------
 const step = ref(1)
-const isOpenModalCreateProfil = ref(false)
 const completedSteps = ref<number[]>([])
 
 const countrys = ref<Country[]>([])
@@ -32,6 +32,8 @@ const router = useRouter()
 // ---------------- FETCH DATA ----------------
 const loadData = async () => {
   try {
+    if (userStore.profil) nextStep()
+
     const resCountrys = await countryStore.getCountry()
     toastSuccess(resCountrys.message || 'Pays chargés avec succès')
     const resVisaType = await visatypeStore.getVisaType()
@@ -39,12 +41,6 @@ const loadData = async () => {
 
     countrys.value = resCountrys.countrys || []
     visaTypes.value = resVisaType.visatypes || []
-
-    // 👉 Vérification du profil utilisateur dès le chargement
-    if (!userStore.profil) {
-      console.warn('🚨 Aucun profil utilisateur trouvé → ouverture de la modal')
-      isOpenModalCreateProfil.value = true
-    }
   } catch {
     toastError('Erreur de chargement des données')
   }
@@ -80,13 +76,6 @@ const submit = async () => {
     if (!res) throw new Error('Erreur lors de la création du visa')
 
     toastSuccess('Visa créé avec succès')
-
-    // 👉 Vérification avant redirection
-    if (!userStore.profil) {
-      isOpenModalCreateProfil.value = true
-      return
-    }
-
     router.push({ name: 'custom.visarequest.create.view' })
     return res
   } catch (err: any) {
@@ -128,7 +117,7 @@ function closeCountryDropdown() {
     <!-- Stepper -->
     <div class="w-full relative">
       <div class="flex justify-between items-start relative">
-        <div v-for="n in 2" :key="n" class="flex-1 flex flex-col items-start justify-start z-10">
+        <div v-for="n in 3" :key="n" class="flex-1 flex flex-col items-start justify-start z-10">
           <div
             class="flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold border-4 transition-all duration-500 shadow-md"
             :class="[
@@ -156,16 +145,24 @@ function closeCountryDropdown() {
         ></div>
         <div
           class="absolute top-1/2 left-0 h-1 -translate-y-1/2 bg-blue-600 rounded-full transition-all duration-500"
-          :style="{ width: `${((step - 1) / 2) * 100}%` }"
+          :style="{ width: `${((step - 1) / 3) * 100}%` }"
         ></div>
       </div>
     </div>
 
     <!-- Contenu -->
     <div class="w-full min-h-screen mx-auto p-6">
-      <!-- Étape 1 -->
+      <!-- Étape 1 : Création du profil -->
       <transition name="fade" mode="out-in">
         <section v-if="step === 1" key="step1">
+          <h2 class="text-4xl font-bold text-center text-purple-600 mb-10">Créez votre Profil</h2>
+          <CreateProfilCustom @created="nextStep" />
+        </section>
+      </transition>
+
+      <!-- Étape 2 : Choix type de visa -->
+      <transition name="fade" mode="out-in">
+        <section v-if="step === 2" key="step2">
           <h2 class="text-4xl font-bold text-center text-purple-600 mb-10">
             Sélectionnez le type de Visa
           </h2>
@@ -183,9 +180,9 @@ function closeCountryDropdown() {
         </section>
       </transition>
 
-      <!-- Étape 2 -->
+      <!-- Étape 3 : Destination -->
       <transition name="fade" mode="out-in">
-        <div class="w-full flex justify-center" v-if="step === 2" key="step2">
+        <div class="w-full flex justify-center" v-if="step === 3" key="step3">
           <section class="w-3xl items-center px-6">
             <h2 class="text-4xl font-bold text-purple-600 mb-8 text-center w-full">
               Choisissez votre destination
@@ -239,22 +236,6 @@ function closeCountryDropdown() {
           </section>
         </div>
       </transition>
-    </div>
-
-    <!-- MODAL CREATE PROFIL -->
-    <div
-      v-if="isOpenModalCreateProfil"
-      class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50"
-    >
-      <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8">
-        <button
-          @click="isOpenModalCreateProfil = false"
-          class="absolute top-4 right-4 text-red-500 hover:text-red-600 cursor-pointer text-xl"
-        >
-          ✕
-        </button>
-        <CreateProfilCustom @created="isOpenModalCreateProfil = false" />
-      </div>
     </div>
   </div>
 </template>

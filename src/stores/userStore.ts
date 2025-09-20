@@ -53,6 +53,13 @@ export const useUserStore = defineStore('user', {
       try {
         const response = await userService.login(credentials)
         this.setAuth(response.user, response.access_token)
+
+        if (response.profil) {
+          this.profil = response.profil
+          localStorage.setItem('profil', JSON.stringify(this.profil))
+        }
+
+        console.log('Profil connecté : ', this.profil)
         await this.redirectDashboard()
         return response
       } catch (err: any) {
@@ -68,7 +75,7 @@ export const useUserStore = defineStore('user', {
       this.loading = true
       this.error = null
       try {
-        // Optionnel côté serveur : await userService.logout()
+        // Côté serveur si nécessaire : await userService.logout()
       } catch (err: any) {
         this.handleError(err, 'Erreur lors de la déconnexion')
       } finally {
@@ -91,37 +98,34 @@ export const useUserStore = defineStore('user', {
         this.loading = false
       }
     },
+    async getCustom() {
+      toastInfo('Chargement des utilisateurs...')
+      this.loading = true
+      this.error = null
+      try {
+        return await userService.getCustom()
+      } catch (err: any) {
+        this.handleError(err, 'Erreur lors de la récupération des utilisateurs')
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
 
-    // async createProfil(id: number, data: Profil) {
-    //   toastInfo("Création de l'utilisateur...")
-    //   this.loading = true
-    //   this.error = null
-    //   try {
-    //     const response = await userService.createProfil(id, data)
-    //     this.profil = response.profil
-    //     localStorage.setItem('profil', JSON.stringify(this.profil))
-    //     return response
-    //   } catch (err: any) {
-    //     this.handleError(err, "Erreur lors de la création de l'utilisateur")
-    //     throw err
-    //   } finally {
-    //     this.loading = false
-    //   }
-    // },
     async editProfil(id: number, data: Profil) {
-      toastInfo("Création de l'utilisateur...")
+      toastInfo('Mise à jour du profil...')
       this.loading = true
       this.error = null
       try {
         const response = await userService.editProfil(id, data)
         this.profil = response.profil
-        console.log('Profil mis a jour : ', response.profil)
-
-        localStorage.setItem('profil', JSON.stringify(this.profil))
-        console.log('Profil : ', this.profil)
+        if (this.profil) {
+          localStorage.setItem('profil', JSON.stringify(this.profil))
+        }
+        console.log('Profil mis à jour : ', this.profil)
         return response
       } catch (err: any) {
-        this.handleError(err, "Erreur lors de la création de l'utilisateur")
+        this.handleError(err, 'Erreur lors de la mise à jour du profil')
         throw err
       } finally {
         this.loading = false
@@ -129,18 +133,24 @@ export const useUserStore = defineStore('user', {
     },
 
     async createCustom(userData: Custom) {
-      toastInfo("Creation  d'un nouveau client...")
+      toastInfo("Création d'un nouveau client...")
       this.loading = true
       this.error = null
       try {
-        return await userService.createCustom(userData)
+        const response = await userService.createCustom(userData)
+        this.custom = response.custom ?? null
+        if (this.custom) {
+          localStorage.setItem('custom', JSON.stringify(this.custom))
+        }
+        return response
       } catch (err: any) {
-        this.handleError(err, "Erreur lors de la creation de l'utilisateur")
+        this.handleError(err, 'Erreur lors de la création du client')
         throw err
       } finally {
         this.loading = false
       }
     },
+
     async showUser(id: number) {
       toastInfo("Chargement de l'utilisateur...")
       this.loading = true
@@ -154,22 +164,23 @@ export const useUserStore = defineStore('user', {
         this.loading = false
       }
     },
+
     async createUser(data: UserRegister) {
-      toastInfo("Creation de l'utilisateur...")
+      toastInfo("Création de l'utilisateur...")
       this.loading = true
       this.error = null
       try {
-        const response = await userService.createUser(data)
-        return response
+        return await userService.createUser(data)
       } catch (err: any) {
-        this.handleError(err, 'Erreur lors de la creation')
+        this.handleError(err, 'Erreur lors de la création')
         throw err
       } finally {
         this.loading = false
       }
     },
+
     async editUser(id: number, data: UserRegister) {
-      toastInfo("Mise a jour de l'utilisateur...")
+      toastInfo("Mise à jour de l'utilisateur...")
       this.loading = true
       this.error = null
       try {
@@ -194,9 +205,13 @@ export const useUserStore = defineStore('user', {
       this.error = null
       try {
         const response = await userService.editCustom(id, data)
+        this.custom = response.custom ?? this.custom
+        if (this.custom) {
+          localStorage.setItem('custom', JSON.stringify(this.custom))
+        }
         return response
       } catch (err: any) {
-        this.handleError(err, 'Erreur lors de la mise à jour')
+        this.handleError(err, 'Erreur lors de la mise à jour du client')
         throw err
       } finally {
         this.loading = false
@@ -229,8 +244,12 @@ export const useUserStore = defineStore('user', {
     resetAuth() {
       this.user = null
       this.token = null
+      this.profil = null
+      this.custom = null
       this.isAuthenticated = false
       localStorage.removeItem('user')
+      localStorage.removeItem('profil')
+      localStorage.removeItem('custom')
       localStorage.removeItem('access_token')
     },
 
@@ -238,10 +257,14 @@ export const useUserStore = defineStore('user', {
       this.error = err.response?.data?.message || defaultMessage
       toastError(this.error!)
     },
+
     loadUserFromLocalStorage() {
-      const stored = localStorage.getItem('user')
-      if (stored) this.user = JSON.parse(stored)
-      toastInfo("Chargement de l'utilisateur depuis le localStorage")
+      this.user = safeParse(localStorage.getItem('user'))
+      this.profil = safeParse(localStorage.getItem('profil'))
+      this.custom = safeParse(localStorage.getItem('custom'))
+      this.token = localStorage.getItem('access_token')
+      this.isAuthenticated = !!this.token
+      toastInfo('Chargement des données utilisateur depuis le localStorage')
     },
 
     async redirectDashboard() {
